@@ -1,23 +1,3 @@
-<script lang="ts" setup>
-import { PropType } from 'vue';
-import BoxContainer from './box-container.vue';
-import Link from './link.vue';
-import Timeline from './timeline.vue';
-import NCPO from './ncpo.vue';
-import { TrackingPromise } from '@/models/promise';
-
-defineProps({
-  expanded: {
-    type: Boolean,
-    default: false,
-  },
-  promise: {
-    type: Object as PropType<TrackingPromise>,
-    default: () => ({}),
-  },
-});
-</script>
-
 <template>
   <div
     v-if="expanded"
@@ -65,3 +45,27 @@ defineProps({
     </div>
   </div>
 </template>
+
+<script lang="ts">
+import Vue, { PropType } from 'vue';
+import BoxContainer from './box-container.vue';
+import Link from './link.vue';
+import Timeline from './timeline.vue';
+import NCPO from './ncpo.vue';
+import { TrackingPromise } from '@/models/promise';
+
+export default Vue.extend({
+  name: 'ExpandedCard',
+  components: { BoxContainer, Link, Timeline, NCPO },
+  props: {
+    expanded: {
+      type: Boolean,
+      default: false,
+    },
+    promise: {
+      type: Object as PropType<TrackingPromise>,
+      default: () => ({}),
+    },
+  },
+});
+</script>

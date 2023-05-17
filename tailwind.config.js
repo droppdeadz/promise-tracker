@@ -1,13 +1,8 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './components/**/*.{js,vue,ts}',
-    './layouts/**/*.vue',
-    './pages/**/*.vue',
-    './plugins/**/*.{js,ts}',
-    './nuxt.config.{js,ts}',
-    './tailwind.safelist.txt',
-  ],
+  purge: {
+    content: ['./tailwind.safelist.txt'],
+  },
+  darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {},
     colors: {
@@ -29,6 +24,9 @@ module.exports = {
     fontWeight: {},
     lineHeight: {},
     letterSpacing: {},
+  },
+  variants: {
+    extend: {},
   },
   plugins: [],
 };

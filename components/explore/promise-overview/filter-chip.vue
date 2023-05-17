@@ -1,58 +1,3 @@
-<script lang="ts" setup>
-import { computed, PropType } from 'vue';
-import { Filter, FilterType } from '@/models/filter';
-import {
-  PromiseStatus,
-  promiseStatusTextMap,
-  PromiseTopic,
-  promiseTopicTextMap,
-} from '@/models/promise';
-
-const $config = useRuntimeConfig();
-
-const props = defineProps({
-  filter: {
-    type: Object as PropType<Filter>,
-    required: true,
-  },
-});
-
-const topic = computed(() => {
-  const { type } = props.filter as Filter;
-  return type;
-});
-const text = computed(() => {
-  const { type, value } = props.filter as Filter;
-
-  switch (type) {
-    case FilterType.Party:
-      return value;
-    case FilterType.Status:
-      return `สถานะ: ${promiseStatusTextMap.get(value as PromiseStatus)}`;
-    case FilterType.Keyword:
-      return `คำค้นหา: ${value}`;
-    case FilterType.Topic:
-      return `ประเด็น${promiseTopicTextMap.get(value as PromiseTopic)?.short}`;
-    default:
-      return '';
-  }
-});
-const icon = computed(() => {
-  const { type, value } = props.filter as Filter;
-
-  switch (type) {
-    case FilterType.Party:
-      return `${value.split('/')[0]}.jpg`;
-    case FilterType.Status:
-      return `${value}_small.png`;
-    case FilterType.Topic:
-      return `${value}_small.png`;
-    default:
-      return '';
-  }
-});
-</script>
-
 <template>
   <div
     class="flex flex-row py-1 px-2 text-ultramarine space-x-2 bg-gray rounded-sm bg-opacity-10"
@@ -61,7 +6,7 @@ const icon = computed(() => {
       <img
         v-if="topic !== 'keyword'"
         class="h-4 w-4 object-cover rounded-full shadow-xl"
-        :src="`${$config.public.path.images}/${topic}/${icon}`"
+        :src="`${$config.path.images}/${topic}/${icon}`"
         :alt="text"
       />
     </div>
@@ -78,3 +23,62 @@ const icon = computed(() => {
     </button>
   </div>
 </template>
+
+<script lang="ts">
+import Vue, { PropType } from 'vue';
+import { Filter, FilterType } from '@/models/filter';
+import {
+  PromiseStatus,
+  promiseStatusTextMap,
+  PromiseTopic,
+  promiseTopicTextMap,
+} from '@/models/promise';
+
+export default Vue.extend({
+  name: 'FilterChips',
+  props: {
+    filter: {
+      type: Object as PropType<Filter>,
+      required: true,
+    },
+  },
+  computed: {
+    topic() {
+      const { type } = this.filter as Filter;
+      return type;
+    },
+    text() {
+      const { type, value } = this.filter as Filter;
+
+      switch (type) {
+        case FilterType.Party:
+          return value;
+        case FilterType.Status:
+          return `สถานะ: ${promiseStatusTextMap.get(value as PromiseStatus)}`;
+        case FilterType.Keyword:
+          return `คำค้นหา: ${value}`;
+        case FilterType.Topic:
+          return `ประเด็น${
+            promiseTopicTextMap.get(value as PromiseTopic)?.short
+          }`;
+        default:
+          return '';
+      }
+    },
+    icon() {
+      const { type, value } = this.filter as Filter;
+
+      switch (type) {
+        case FilterType.Party:
+          return `${value.split('/')[0]}.jpg`;
+        case FilterType.Status:
+          return `${value}_small.png`;
+        case FilterType.Topic:
+          return `${value}_small.png`;
+        default:
+          return '';
+      }
+    },
+  },
+});
+</script>

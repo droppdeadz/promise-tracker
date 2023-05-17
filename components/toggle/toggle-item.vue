@@ -1,25 +1,3 @@
-<script lang="ts" setup>
-import { PropType } from 'vue';
-import { ListOption } from './toggle-list.vue';
-
-const $emit = defineEmits(['selected']);
-
-const props = defineProps({
-  selected: {
-    type: Boolean,
-    default: false,
-  },
-  option: {
-    type: Object as PropType<ListOption>,
-    default: undefined,
-  },
-});
-
-const clickItem = () => {
-  $emit('selected', props.option?.label);
-};
-</script>
-
 <template>
   <button
     class="flex border px-2 py-1.5 space-x-1 items-center border-white rounded-sm wv-font-anuphan wv-font-semibold wv-u5"
@@ -57,10 +35,34 @@ const clickItem = () => {
       />
     </svg>
     <div
-      v-if="option?.colorClass"
+      v-if="option.colorClass"
       class="rounded-full w-2.5 h-2.5"
-      :class="option?.colorClass"
+      :class="option.colorClass"
     ></div>
-    <label class="cursor-pointer">{{ option?.label }}</label>
+    <label class="cursor-pointer">{{ option.label }}</label>
   </button>
 </template>
+
+<script lang="ts">
+import Vue, { PropType } from 'vue';
+import { ListOption } from './toggle-list.vue';
+
+export default Vue.extend({
+  name: 'ToggleItem',
+  props: {
+    selected: {
+      type: Boolean,
+      default: false,
+    },
+    option: {
+      type: Object as PropType<ListOption>,
+      default: undefined,
+    },
+  },
+  methods: {
+    clickItem() {
+      this.$emit('selected', this.option.label);
+    },
+  },
+});
+</script>

@@ -1,27 +1,3 @@
-<script lang="ts" setup>
-import { reactive, PropType } from 'vue';
-import ActiveFilters from './active-filters.vue';
-import TabNavigation from './tab-navigation.vue';
-import TabBody from './tab-body.vue';
-import { TrackingPromise } from '@/models/promise';
-import { Filter, FilterType } from '@/models/filter';
-
-defineProps({
-  promises: {
-    type: Array as PropType<TrackingPromise[]>,
-    default: () => [],
-  },
-  filters: {
-    type: Array as PropType<Filter[]>,
-    default: () => [],
-  },
-});
-
-const state = reactive({
-  activeTab: FilterType.Status,
-});
-</script>
-
 <template>
   <div class="w-full flex flex-col lg:flex-row">
     <div class="flex-1 flex items-end">
@@ -33,16 +9,45 @@ const state = reactive({
         "
         :filters="filters"
         :promises="promises"
-        @removefilter="(filter: any) => $emit('removefilter', filter)"
+        @removefilter="(filter) => $emit('removefilter', filter)"
       />
     </div>
     <div v-if="promises.length !== 0" class="flex-1">
       <TabNavigation
         :filters="filters"
-        :active-tab="state.activeTab"
-        @change="(type: any) => (state.activeTab = type)"
+        :active-tab="activeTab"
+        @change="(type) => (activeTab = type)"
       />
-      <TabBody :promises="promises" :group-by="state.activeTab" />
+      <TabBody :promises="promises" :group-by="activeTab" />
     </div>
   </div>
 </template>
+
+<script lang="ts">
+import Vue, { PropType } from 'vue';
+import ActiveFilters from './active-filters.vue';
+import TabNavigation from './tab-navigation.vue';
+import TabBody from './tab-body.vue';
+import { TrackingPromise } from '@/models/promise';
+import { Filter, FilterType } from '@/models/filter';
+
+export default Vue.extend({
+  name: 'PromiseOverview',
+  components: { TabBody, TabNavigation, ActiveFilters },
+  props: {
+    promises: {
+      type: Array as PropType<TrackingPromise[]>,
+      default: () => [],
+    },
+    filters: {
+      type: Array as PropType<Filter[]>,
+      default: () => [],
+    },
+  },
+  data() {
+    return {
+      activeTab: FilterType.Status,
+    };
+  },
+});
+</script>

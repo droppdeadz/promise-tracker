@@ -1,7 +1,3 @@
-<script lang="ts" setup>
-import Button from '@/components/button.vue';
-</script>
-
 <template>
   <a
     ref="form"
@@ -27,3 +23,12 @@ import Button from '@/components/button.vue';
     </Button>
   </a>
 </template>
+
+<script lang="ts">
+import Vue from 'vue';
+import Button from '@/components/button.vue';
+export default Vue.extend({
+  name: 'FormLink',
+  components: { Button },
+});
+</script>

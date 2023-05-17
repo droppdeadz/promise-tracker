@@ -1,51 +1,3 @@
-<script lang="ts" setup>
-import { computed, PropType } from 'vue';
-import FilterChip from './filter-chip.vue';
-
-import { Filter, FilterType } from '@/models/filter';
-import { TrackingPromise } from '@/models/promise';
-
-const $config = useRuntimeConfig();
-
-const props = defineProps({
-  promises: {
-    type: Array as PropType<TrackingPromise[]>,
-    default: () => [],
-  },
-  filters: {
-    type: Array as PropType<Filter[]>,
-    default: () => [],
-  },
-});
-
-const filterImages = computed(() => {
-  return (props.promises as TrackingPromise[]).length === 0
-    ? [
-        {
-          type: 'default',
-          value: 'all',
-          src: 'status/notfound.png',
-        },
-      ]
-    : (props.filters as Filter[]).length === 0
-    ? [
-        {
-          type: 'default',
-          value: 'all',
-          src: 'status/default.png',
-        },
-      ]
-    : props.filters
-        .filter(({ type }) => type !== FilterType.Keyword)
-        .map(({ type, value }) => ({
-          type,
-          value,
-          src: `${type}/${value.split('/')[0]}.${
-            type === FilterType.Party ? 'jpg' : 'png'
-          }`,
-        }));
-});
-</script>
 <template>
   <div
     class="flex-1 md:h-80 bg-white flex flex-row p-8 space-x-8 items-center justify-center rounded-t-xl"
@@ -59,7 +11,7 @@ const filterImages = computed(() => {
       >
         <img
           class="rounded-full shadow-xl object-cover active-image w-full h-full"
-          :src="`${$config.public.path.images}/${src}`"
+          :src="`${$config.path.images}/${src}`"
           :alt="value"
         />
       </div>
@@ -94,3 +46,57 @@ const filterImages = computed(() => {
     </div>
   </div>
 </template>
+
+<script lang="ts">
+import Vue, { PropType } from 'vue';
+import FilterChip from './filter-chip.vue';
+
+import { Filter, FilterType } from '@/models/filter';
+import { TrackingPromise } from '@/models/promise';
+
+export default Vue.extend({
+  name: 'ActiveFilters',
+  components: {
+    FilterChip,
+  },
+  props: {
+    promises: {
+      type: Array as PropType<TrackingPromise[]>,
+      default: () => [],
+    },
+    filters: {
+      type: Array as PropType<Filter[]>,
+      default: () => [],
+    },
+  },
+  computed: {
+    filterImages() {
+      return (this.promises as TrackingPromise[]).length === 0
+        ? [
+            {
+              type: 'default',
+              value: 'all',
+              src: 'status/notfound.png',
+            },
+          ]
+        : (this.filters as Filter[]).length === 0
+        ? [
+            {
+              type: 'default',
+              value: 'all',
+              src: 'status/default.png',
+            },
+          ]
+        : this.filters
+            .filter(({ type }) => type !== FilterType.Keyword)
+            .map(({ type, value }) => ({
+              type,
+              value,
+              src: `${type}/${value.split('/')[0]}.${
+                type === FilterType.Party ? 'jpg' : 'png'
+              }`,
+            }));
+    },
+  },
+});
+</script>
