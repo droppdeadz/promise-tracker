@@ -1,10 +1,27 @@
+<script lang="ts" setup>
+import { reactive } from 'vue';
+import StatusAnimation from './status-animation.vue';
+import Button from './button.vue';
+import { lastUpdated } from '@/data/metadata.json';
+
+const $config = useRuntimeConfig();
+
+const state = reactive({
+  updatedDate: new Date(lastUpdated).toLocaleDateString('th-TH', {
+    year: '2-digit',
+    month: 'short',
+    day: 'numeric',
+  }),
+});
+</script>
+
 <template>
   <div
     class="relative justify-center max-w-7xl w-full landing-bg overflow-hidden"
   >
     <img
       class="absolute m-auto opacity-95 overflow-hidden max-w-none sm:max-w-full -top-16 sm:top-0"
-      :src="`${$config.path.images}/background/landing_bg.png`"
+      :src="`${$config.public.path.images}/background/landing_bg.png`"
       alt="landing_bg"
       style="z-index: 1; left: 50%; transform: translateX(-50%)"
     />
@@ -24,7 +41,7 @@
       </h4>
       <div class="flex flex-col items-center py-4 w-full px-4">
         <div class="p-2 wv-font-anuphan wv-u5 bg-gray bg-opacity-10 rounded-sm">
-          อัปเดตล่าสุด {{ updatedDate }}
+          อัปเดตล่าสุด {{ state.updatedDate }}
         </div>
         <NuxtLink class="mt-3 mb-6 mx-auto" to="explore">
           <Button
@@ -54,27 +71,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import Vue from 'vue';
-import StatusAnimation from './status-animation.vue';
-import Button from './button.vue';
-import { lastUpdated } from '@/data/metadata.json';
-
-export default Vue.extend({
-  name: 'Landing',
-  components: { StatusAnimation, Button },
-  data() {
-    return {
-      updatedDate: new Date(lastUpdated).toLocaleDateString('th-TH', {
-        year: '2-digit',
-        month: 'short',
-        day: 'numeric',
-      }),
-    };
-  },
-});
-</script>
 
 <style scoped>
 .landing-bg {

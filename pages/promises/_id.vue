@@ -1,3 +1,49 @@
+<script lang="ts" setup>
+import { computed, reactive, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import {
+  matchedPromise,
+  titleText,
+  descriptionMap,
+  imageUrl,
+} from '@/utils/promises-meta';
+import promises from '@/data/promises.json';
+import PromiseCard from '@/components/promise-card/promise-card.vue';
+import LinkBanner from '@/components/link-banner.vue';
+import FormLink from '@/components/form-link.vue';
+import { PromiseStatus, TrackingPromise } from '@/models/promise';
+import { createMetadata } from '~/utils/metadata';
+
+const $config = useRuntimeConfig();
+const $route = useRoute();
+
+const state = reactive({
+  slug: $route.params,
+});
+
+const id = computed(() => parseInt(state.slug?.id, 10));
+const promise = computed(() =>
+  matchedPromise(promises as TrackingPromise[], id.value)
+);
+
+onMounted(() => {
+  if (!promise.value) {
+    return useHead(createMetadata());
+  }
+
+  const baseImageUrl = `https://raw.githubusercontent.com/wevisdemo/promise-tracker/main/static/og`;
+  const { title, party, status } = promise.value as TrackingPromise;
+
+  return useHead(
+    createMetadata({
+      pageName: titleText(title, party),
+      description: descriptionMap.get(status as PromiseStatus),
+      image: imageUrl(baseImageUrl, status),
+    })
+  );
+});
+</script>
+
 <template>
   <div
     class="flex flex-col items-center z-10 bg-no-repeat bg-fixed bg-cover"
@@ -45,56 +91,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import Vue from 'vue';
-import {
-  matchedPromise,
-  titleText,
-  descriptionMap,
-  imageUrl,
-} from '@/utils/promises-meta';
-import promises from '@/data/promises.json';
-import PromiseCard from '@/components/promise-card/promise-card.vue';
-import LinkBanner from '@/components/link-banner.vue';
-import FormLink from '@/components/form-link.vue';
-import { PromiseStatus, TrackingPromise } from '@/models/promise';
-import { createMetadata } from '~/utils/metadata';
-
-export default Vue.extend({
-  name: 'PromisePage',
-  components: {
-    PromiseCard,
-    LinkBanner,
-    FormLink,
-  },
-  data() {
-    return {
-      slug: this.$route.params,
-    };
-  },
-  head(): {} {
-    if (!this.promise) return createMetadata();
-
-    const baseImageUrl = `https://raw.githubusercontent.com/wevisdemo/promise-tracker/main/static/og`;
-    const { title, party, status } = this.promise as TrackingPromise;
-
-    return createMetadata({
-      pageName: titleText(title, party),
-      description: descriptionMap.get(status as PromiseStatus),
-      image: imageUrl(baseImageUrl, status),
-    });
-  },
-  computed: {
-    id(): number {
-      return parseInt(this.slug.id, 10);
-    },
-    promise(): TrackingPromise | {} {
-      return matchedPromise(promises as TrackingPromise[], this.id);
-    },
-  },
-});
-</script>
 
 <style scoped>
 .blog-header {

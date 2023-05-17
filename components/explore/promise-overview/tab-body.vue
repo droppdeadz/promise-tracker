@@ -1,3 +1,31 @@
+<script lang="ts" setup>
+import { computed, PropType, reactive } from 'vue';
+import ChartItem from './chart-item.vue';
+import { groupPromisesBy } from './promises-aggregator';
+import Button from '@/components/button.vue';
+import StatusExplanation from '@/components/explanation/status-explanation.vue';
+import { TrackingPromise } from '@/models/promise';
+import { FilterType } from '@/models/filter';
+
+const props = defineProps({
+  promises: {
+    type: Array as PropType<TrackingPromise[]>,
+    default: () => [],
+  },
+  groupBy: {
+    type: String as PropType<
+      FilterType.Party | FilterType.Status | FilterType.Topic
+    >,
+    required: true,
+  },
+});
+
+const state = reactive({
+  isExplanationDialogOpen: false,
+});
+
+const group = computed(() => groupPromisesBy(props.groupBy, props.promises));
+</script>
 <template>
   <div>
     <div
@@ -14,7 +42,9 @@
           :total="group.total"
         />
       </div>
-      <Button class="justify-center" @click="isExplanationDialogOpen = true"
+      <Button
+        class="justify-center"
+        @click="state.isExplanationDialogOpen = true"
         ><svg
           width="15"
           height="16"
@@ -31,12 +61,12 @@
     </div>
 
     <div
-      v-if="isExplanationDialogOpen"
+      v-if="state.isExplanationDialogOpen"
       class="fixed inset-0 bg-ultramarine z-50 flex justify-center overflow-y-scroll hide-scrollbar"
     >
       <button
         class="fixed top-4 right-4 flex justify-center items-center w-7 h-7 p-1.5 bg-white rounded-full text-ultramarine"
-        @click="isExplanationDialogOpen = false"
+        @click="state.isExplanationDialogOpen = false"
       >
         <svg viewBox="0 0 18 17" fill="currentColor">
           <rect
@@ -61,43 +91,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import Vue, { PropType } from 'vue';
-import ChartItem from './chart-item.vue';
-import { groupPromisesBy } from './promises-aggregator';
-import Button from '@/components/button.vue';
-import StatusExplanation from '@/components/explanation/status-explanation.vue';
-import { TrackingPromise } from '@/models/promise';
-import { FilterType } from '@/models/filter';
-
-export default Vue.extend({
-  name: 'TabBody',
-  components: { Button, ChartItem, StatusExplanation },
-  props: {
-    promises: {
-      type: Array as PropType<TrackingPromise[]>,
-      default: () => [],
-    },
-    groupBy: {
-      type: String as PropType<
-        FilterType.Party | FilterType.Status | FilterType.Topic
-      >,
-      required: true,
-    },
-  },
-  data() {
-    return {
-      isExplanationDialogOpen: false,
-    };
-  },
-  computed: {
-    group() {
-      return groupPromisesBy(this.groupBy, this.promises);
-    },
-  },
-});
-</script>
 
 <style scoped>
 .hide-scrollbar::-webkit-scrollbar {

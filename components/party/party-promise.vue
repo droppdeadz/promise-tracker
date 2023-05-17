@@ -1,3 +1,32 @@
+<script setup>
+import { reactive } from 'vue';
+import PartyCard from '~/components/party/party-card.vue';
+import StatusLegend from '@/components/explanation/status-legend.vue';
+import { groupPromisesBy } from '@/components/explore/promise-overview/promises-aggregator';
+import promises from '@/data/promises.json';
+import parties from '@/data/parties.json';
+import { FilterType } from '@/models/filter';
+
+const [governmentParties, oppositionParties] = groupPromisesBy(
+  FilterType.Party,
+  promises,
+  50
+).charts.reduce(
+  ([govParties, oppParties], party) =>
+    parties.find(({ name }) => name === party.label)?.side === 'government'
+      ? [[...govParties, party], oppParties]
+      : [govParties, [...oppParties, party]],
+  [[], []]
+);
+
+const state = reactive({
+  partySides: [
+    { name: 'ฝ่ายรัฐบาล', parties: governmentParties },
+    { name: 'ฝ่ายค้าน', parties: oppositionParties },
+  ],
+});
+</script>
+
 <template>
   <div
     class="grid grid-cols-6 gap-4 p-4 sm:p-6 max-w-4xl bg-gray bg-opacity-10 rounded-xl"
@@ -10,7 +39,7 @@
     <div class="col-span-6 sm:col-span-4">
       <div class="flex flex-col gap-6">
         <div
-          v-for="{ name, parties } in partySides"
+          v-for="{ name, parties } in state.partySides"
           :key="name"
           class="flex flex-col gap-4"
         >
@@ -32,40 +61,3 @@
     </div>
   </div>
 </template>
-
-<script>
-import PartyCard from '~/components/party/party-card.vue';
-import StatusLegend from '@/components/explanation/status-legend.vue';
-import { groupPromisesBy } from '@/components/explore/promise-overview/promises-aggregator';
-import promises from '@/data/promises.json';
-import parties from '@/data/parties.json';
-import { FilterType } from '@/models/filter';
-
-const [governmentParties, oppositionParties] = groupPromisesBy(
-  FilterType.Party,
-  promises,
-  50
-).charts.reduce(
-  ([govParties, oppParties], party) =>
-    parties.find(({ name }) => name === party.label)?.side === 'government'
-      ? [[...govParties, party], oppParties]
-      : [govParties, [...oppParties, party]],
-  [[], []]
-);
-
-export default {
-  name: 'PartyPromise',
-  components: {
-    PartyCard,
-    StatusLegend,
-  },
-  data() {
-    return {
-      partySides: [
-        { name: 'ฝ่ายรัฐบาล', parties: governmentParties },
-        { name: 'ฝ่ายค้าน', parties: oppositionParties },
-      ],
-    };
-  },
-};
-</script>

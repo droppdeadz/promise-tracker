@@ -1,3 +1,16 @@
+<script lang="ts" setup>
+import { PropType } from 'vue';
+
+type IconTheme = 'white' | 'black';
+
+defineProps({
+  theme: {
+    type: String as PropType<IconTheme>,
+    default: 'white',
+  },
+});
+</script>
+
 <template>
   <svg
     width="10"
@@ -12,19 +25,3 @@
     />
   </svg>
 </template>
-
-<script lang="ts">
-import Vue, { PropType } from 'vue';
-
-type IconTheme = 'white' | 'black';
-
-export default Vue.extend({
-  name: 'DowndownIcon',
-  props: {
-    theme: {
-      type: String as PropType<IconTheme>,
-      default: 'white',
-    },
-  },
-});
-</script>

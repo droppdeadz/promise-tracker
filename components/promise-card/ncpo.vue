@@ -9,13 +9,3 @@
     </p>
   </BoxContainer>
 </template>
-
-<script lang="ts">
-import Vue from 'vue';
-import BoxContainer from './box-container.vue';
-
-export default Vue.extend({
-  name: 'NCPO',
-  components: { BoxContainer },
-});
-</script>

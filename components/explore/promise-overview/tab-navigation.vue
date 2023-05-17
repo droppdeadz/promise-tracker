@@ -1,3 +1,46 @@
+<script lang="ts" setup>
+import { computed, PropType } from 'vue';
+import { Filter, FilterType } from '@/models/filter';
+
+const buttons = [
+  { label: 'ดูตามสถานะ', type: FilterType.Status },
+  { label: 'ดูตามพรรค', type: FilterType.Party },
+  { label: 'ดูตามประเด็น', type: FilterType.Topic },
+];
+
+const $emit = defineEmits(['change']);
+
+const props = defineProps({
+  filters: {
+    type: Array as PropType<Filter[]>,
+    default: () => [],
+  },
+  activeTab: {
+    type: String as PropType<FilterType>,
+    default: null,
+  },
+});
+
+const displayButtons = computed(() => {
+  const displayButtons = buttons.filter(
+    ({ type }) => !props.filters.find((filter) => filter.type === type)
+  );
+
+  if (
+    displayButtons.length > 0 &&
+    !displayButtons.some(({ type }) => type === props.activeTab)
+  ) {
+    onChange(displayButtons[0].type);
+  }
+
+  return displayButtons;
+});
+
+const onChange = (type: FilterType) => {
+  $emit('change', type);
+};
+</script>
+
 <template>
   <div class="flex flex-row space-x-1 bg-white md:bg-transparent">
     <button
@@ -12,49 +55,3 @@
     </button>
   </div>
 </template>
-
-<script lang="ts">
-import Vue, { PropType } from 'vue';
-import { Filter, FilterType } from '@/models/filter';
-
-export const buttons = [
-  { label: 'ดูตามสถานะ', type: FilterType.Status },
-  { label: 'ดูตามพรรค', type: FilterType.Party },
-  { label: 'ดูตามประเด็น', type: FilterType.Topic },
-];
-
-export default Vue.extend({
-  name: 'TabNavigation',
-  props: {
-    filters: {
-      type: Array as PropType<Filter[]>,
-      default: () => [],
-    },
-    activeTab: {
-      type: String as PropType<FilterType>,
-      default: null,
-    },
-  },
-  computed: {
-    displayButtons() {
-      const displayButtons = buttons.filter(
-        ({ type }) => !this.filters.find((filter) => filter.type === type)
-      );
-
-      if (
-        displayButtons.length > 0 &&
-        !displayButtons.some(({ type }) => type === this.activeTab)
-      ) {
-        this.onChange(displayButtons[0].type);
-      }
-
-      return displayButtons;
-    },
-  },
-  methods: {
-    onChange(type: FilterType) {
-      this.$emit('change', type);
-    },
-  },
-});
-</script>

@@ -1,3 +1,54 @@
+<script lang="ts" setup>
+import { reactive, onMounted, PropType } from 'vue';
+import WvSharer from '@wevisdemo/ui/components/sharer.vue';
+import IconUp from './icon-up.vue';
+import StatusLegend from '@/components/explanation/status-legend.vue';
+import {
+  TrackingPromise,
+  PromiseStatus,
+  promiseStatusTextMap,
+  PromiseTopic,
+  promiseTopicTextMap,
+} from '@/models/promise';
+
+const $config = useRuntimeConfig();
+
+const $emit = defineEmits(['readmore']);
+
+const props = defineProps({
+  promise: {
+    type: Object as PropType<TrackingPromise>,
+    default: () => ({}),
+  },
+  openState: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const state = reactive({
+  clicked: props.openState,
+  isMounted: false,
+  shareUrl: '',
+});
+
+onMounted(() => {
+  state.shareUrl = `${location.origin}${$config.public.path.base}/promises/${props.promise.id}`;
+  state.isMounted = true;
+});
+
+const onReadClick = () => {
+  state.clicked = !state.clicked;
+  $emit('readmore', state.clicked);
+};
+const getStatus = (status: PromiseStatus) => {
+  return promiseStatusTextMap.get(status as PromiseStatus);
+};
+const getTopic = (topic: PromiseTopic) => {
+  return promiseTopicTextMap.get(topic as PromiseTopic)?.short;
+};
+</script>
+
 <template>
   <div
     :id="`single-card-${promise.id}`"
@@ -43,7 +94,7 @@
         <div class="w-4 mr-2">
           <img
             :id="`single-card-${promise.id}-topic-icon`"
-            :src="`${$config.path.images}/topic/${promise.topic}.png`"
+            :src="`${$config.public.path.images}/topic/${promise.topic}.png`"
             :alt="`${promise.topic}`"
           />
         </div>
@@ -56,7 +107,7 @@
           <img
             v-if="promise.party"
             :id="`single-card-${promise.id}-party-logo`"
-            :src="`${$config.path.images}/party/${
+            :src="`${$config.public.path.images}/party/${
               promise.party.split('/')[0]
             }.jpg`"
             :alt="`${promise.party}`"
@@ -76,74 +127,22 @@
         @click="onReadClick"
       >
         <p class="px-3">
-          {{ clicked ? 'ปิด' : 'อ่านเพิ่มเติม' }}
+          {{ state.clicked ? 'ปิด' : 'อ่านเพิ่มเติม' }}
         </p>
-        <IconUp :class="clicked ? '' : 'transform rotate-180'" />
+        <IconUp :class="state.clicked ? '' : 'transform rotate-180'" />
       </button>
       <div class="flex items-center">
         <p class="hidden sm:block">แชร์คำสัญญา</p>
         <WvSharer
-          v-if="isMounted"
+          v-if="state.isMounted"
           class="mr-3"
           label=" "
           :allow-copy-link="true"
           :light="true"
           :outline="true"
-          :url="shareUrl"
+          :url="state.shareUrl"
         />
       </div>
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import Vue, { PropType } from 'vue';
-import WvSharer from '@wevisdemo/ui/components/sharer.vue';
-import IconUp from './icon-up.vue';
-import StatusLegend from '@/components/explanation/status-legend.vue';
-import {
-  TrackingPromise,
-  PromiseStatus,
-  promiseStatusTextMap,
-  PromiseTopic,
-  promiseTopicTextMap,
-} from '@/models/promise';
-
-export default Vue.extend({
-  name: 'SingleCard',
-  components: { StatusLegend, WvSharer, IconUp },
-  props: {
-    promise: {
-      type: Object as PropType<TrackingPromise>,
-      default: () => ({}),
-    },
-    openState: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      clicked: this.$props.openState,
-      isMounted: false,
-      shareUrl: '',
-    };
-  },
-  mounted() {
-    this.shareUrl = `${location.origin}${this.$config.path.base}/promises/${this.$props.promise.id}`;
-    this.isMounted = true;
-  },
-  methods: {
-    onReadClick() {
-      this.clicked = !this.clicked;
-      this.$emit('readmore', this.clicked);
-    },
-    getStatus(status: PromiseStatus) {
-      return promiseStatusTextMap.get(status as PromiseStatus);
-    },
-    getTopic(topic: PromiseTopic) {
-      return promiseTopicTextMap.get(topic as PromiseTopic)?.short;
-    },
-  },
-});
-</script>

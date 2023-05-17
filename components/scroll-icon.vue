@@ -18,14 +18,6 @@
   </div>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-
-export default Vue.extend({
-  name: 'ScrollIcon',
-});
-</script>
-
 <style scoped>
 .scroll-animation {
   transform: translateY(0px);

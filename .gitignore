@@ -6,6 +6,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+_logs
 
 # Runtime data
 pids
@@ -43,6 +44,9 @@ typings/
 
 # Optional npm cache directory
 .npm
+_npx
+_cacache
+_update-notifier-last-checked
 
 # Optional eslint cache
 .eslintcache
@@ -70,6 +74,7 @@ typings/
 
 # Nuxt generate
 dist
+.output
 
 # vuepress build output
 .vuepress/dist

@@ -9,7 +9,7 @@ Thai politicians and parties promise tracker
 
 ## 💻 Tech stack
 
-- [NuxtJS](https://nuxtjs.org/) with [Vue 2 and TypeScript](https://v2.vuejs.org/v2/guide/typescript.html#Basic-Usage)
+- [NuxtJS](https://nuxt.com/) with [Vue 3 and TypeScript](https://vuejs.org/guide/typescript/overview.html)
 - [TailwindCSS](https://tailwindcss.com/)
 - [Jest](https://jestjs.io/) and [Vue Test Utils](https://v1.test-utils.vuejs.org/guides/#getting-started)
 
@@ -42,10 +42,10 @@ Use `pascal-case` for every file name since Linux (eg. Github Action runner) is 
 - `/data` JSON promises and related data, including example one before fetching script is implemented.
 - `/models` Data types (interface, enum, etc.) sharing across the project
 - `/pages` Represent [Nuxt routing](https://nuxtjs.org/docs/directory-structure/pages)
-- `/static` Static assets such as images
+- `/public` Static assets such as images
   - Before adding new assets, check first if it's already exist here.
-  - `$config.path.base` can be used to reference `static` path (or base path)
-  - `$config.path.images` can be used to reference `static/images` path
+  - `$config.path.base` can be used to reference `public` path (or base path)
+  - `$config.path.images` can be used to reference `public/images` path
   ```vue
     <img :src="`${$config.path.images}/status/nodata.png`"
   ```

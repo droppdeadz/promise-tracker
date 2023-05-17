@@ -1,3 +1,13 @@
+<script lang="ts" setup>
+defineProps({
+  title: {
+    type: String,
+    required: true,
+    default: '',
+  },
+});
+</script>
+
 <template>
   <div
     class="flex flex-col items-center bg-gray bg-opacity-10 rounded-xl max-w-4xl divide-y divide-white divide-dashed p-4 sm:p-6"
@@ -12,17 +22,3 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import Vue from 'vue';
-export default Vue.extend({
-  name: 'ExplanationContainer',
-  props: {
-    title: {
-      type: String,
-      required: true,
-      default: '',
-    },
-  },
-});
-</script>

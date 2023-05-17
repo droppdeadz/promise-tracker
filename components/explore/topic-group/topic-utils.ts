@@ -11,7 +11,7 @@ export interface Group {
   where: PromiseTopic | PromiseStatus | string;
 }
 
-export const groupBy = (topic: String, status: String) => {
+export const getGroupBy = (topic: String, status: String) => {
   if (topic !== '' && status === '') {
     return { by: 'topic', where: topic as PromiseTopic };
   } else if (topic === '' && status !== '') {
@@ -21,7 +21,7 @@ export const groupBy = (topic: String, status: String) => {
   }
 };
 
-export const filteredPromise = (
+export const getFilteredPromise = (
   promises: TrackingPromise[],
   by: String,
   where: PromiseTopic | PromiseStatus | String
@@ -74,7 +74,7 @@ export const getGroupTitle = (
   }
 };
 
-export const computedPromisePerPage = (
+export const getComputedPromisePerPage = (
   promisePerPage: number,
   promiseLength: number
 ) => {
@@ -85,12 +85,15 @@ export const computedPromisePerPage = (
   }
 };
 
-export const pageLength = (promiseLength: number, promisePerPage: number) => {
+export const getPageLength = (
+  promiseLength: number,
+  promisePerPage: number
+) => {
   if (promisePerPage <= 0) return 0;
   return Math.ceil(promiseLength / promisePerPage);
 };
 
-export const pageNumberArray = (pageLength: number, currentPage: number) => {
+export const getPageNumberArray = (pageLength: number, currentPage: number) => {
   if (currentPage > pageLength || pageLength < 0 || currentPage < 0) return [];
   const fullArray = Array.from({ length: pageLength }, (_, index) => index + 1);
   let returnedArray = [];
@@ -124,7 +127,7 @@ export const pageNumberArray = (pageLength: number, currentPage: number) => {
   return returnedArray;
 };
 
-export const currentPagePromises = (
+export const getCurrentPagePromises = (
   promises: TrackingPromise[],
   currentPage: number,
   promisePerPage: number

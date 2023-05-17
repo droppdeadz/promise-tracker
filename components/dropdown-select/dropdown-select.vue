@@ -1,3 +1,60 @@
+<script lang="ts" setup>
+import { computed, reactive, PropType } from 'vue';
+import DropdownIcon from './dropdown-icon.vue';
+import DropdownItem from './dropdown-item.vue';
+
+export interface Option {
+  isHeader?: boolean;
+  label: string;
+  value: string;
+  iconUrl?: string;
+}
+
+const $config = useRuntimeConfig();
+
+const $emit = defineEmits(['input']);
+
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: '',
+  },
+  placeholder: {
+    type: String,
+    default: '',
+  },
+  placeholderSelecting: {
+    type: String,
+    default: '',
+  },
+  options: {
+    type: Array as PropType<Option[]>,
+    default: () => [],
+  },
+});
+
+const state = reactive({
+  selecting: false,
+});
+
+const selectClasses = computed(() => {
+  if (state.selecting) {
+    return 'text-white bg-transparent';
+  }
+  return 'bg-white';
+});
+
+const selectedOption = computed(() =>
+  props.options.find((o) => o.value === props.modelValue)
+);
+
+const toggleSelecting = () => (state.selecting = !state.selecting);
+const select = (value: string) => {
+  $emit('input', value);
+  toggleSelecting();
+};
+</script>
+
 <template>
   <div class="relative">
     <button
@@ -6,23 +63,23 @@
       :class="selectClasses"
       @click="toggleSelecting"
     >
-      <div v-if="value" class="flex items-center">
+      <div v-if="modelValue" class="flex items-center">
         <img
           v-if="options"
           class="w-5 h-5 rounded-full border border-gray border-opacity-10 mr-1"
-          :src="`${$config.path.images}${selectedOption.iconUrl}`"
+          :src="`${$config.public.path.images}${selectedOption?.iconUrl}`"
         />
-        <span v-if="options">{{ selectedOption.label }}</span>
+        <span v-if="options">{{ selectedOption?.label }}</span>
       </div>
-      <span v-else-if="!selecting">{{ placeholder }}</span>
+      <span v-else-if="!state.selecting">{{ placeholder }}</span>
       <span v-else>{{ placeholderSelecting }}</span>
       <DropdownIcon
-        :theme="selecting ? 'white' : 'black'"
-        :class="selecting ? 'transform rotate-180' : null"
+        :theme="state.selecting ? 'white' : 'black'"
+        :class="state.selecting ? 'transform rotate-180' : null"
       />
     </button>
-    <template v-if="selecting">
-      <div class="hidden md:fixed inset-0" @click="selecting = false" />
+    <template v-if="state.selecting">
+      <div class="hidden md:fixed inset-0" @click="state.selecting = false" />
 
       <div
         id="item-list"
@@ -44,64 +101,3 @@
     </template>
   </div>
 </template>
-
-<script lang="ts">
-import Vue, { PropType } from 'vue';
-import DropdownIcon from './dropdown-icon.vue';
-import DropdownItem from './dropdown-item.vue';
-
-export interface Option {
-  isHeader?: boolean;
-  label: string;
-  value: string;
-  iconUrl?: string;
-}
-
-export default Vue.extend({
-  name: 'DropdownSelect',
-  components: { DropdownIcon, DropdownItem },
-  props: {
-    value: {
-      type: String,
-      default: '',
-    },
-    placeholder: {
-      type: String,
-      default: '',
-    },
-    placeholderSelecting: {
-      type: String,
-      default: '',
-    },
-    options: {
-      type: Array as PropType<Option[]>,
-      default: () => [],
-    },
-  },
-  data() {
-    return {
-      selecting: false,
-    };
-  },
-  computed: {
-    selectClasses() {
-      if (this.selecting) {
-        return 'text-white bg-transparent';
-      }
-      return 'bg-white';
-    },
-    selectedOption() {
-      return this.options.find((o) => o.value === this.value);
-    },
-  },
-  methods: {
-    toggleSelecting() {
-      this.selecting = !this.selecting;
-    },
-    select(value: string) {
-      this.$emit('input', value);
-      this.toggleSelecting();
-    },
-  },
-});
-</script>

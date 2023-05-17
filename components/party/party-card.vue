@@ -1,3 +1,60 @@
+<script lang="ts" setup>
+import { computed } from 'vue';
+import { PromiseStatus } from '@/models/promise';
+
+const $config = useRuntimeConfig();
+
+const props = defineProps({
+  partyLogo: {
+    type: String,
+    default: '',
+    required: false,
+  },
+  partyName: {
+    type: String,
+    default: '',
+  },
+  partyPromises: {
+    type: Array,
+    default: () => [],
+  },
+  buttonUrl: {
+    type: String,
+    default: '',
+  },
+});
+
+const sumPartyPromises = computed(() => {
+  const promiseStatus = props.partyPromises as Array<any>;
+  const count = promiseStatus.map((a: any) => a.count);
+  if (count.length > 0) {
+    const sum = count.reduce((a: any, b: any) => a + b);
+    return sum;
+  } else {
+    return 0;
+  }
+});
+
+const promises = computed(() => {
+  const promiseStatus = props.partyPromises as Array<any>;
+  if (promiseStatus.length > 0) {
+    const chart = promiseStatus.map((a: any) => {
+      const status = a.status;
+      const count = a.count;
+      const countPercentage = (
+        (a.count / sumPartyPromises.value) *
+        100
+      ).toFixed(2);
+      return { status, count, countPercentage };
+    });
+    return chart;
+  } else {
+    const dummy = [{ status: PromiseStatus.NoData, countPercentage: '100' }];
+    return dummy;
+  }
+});
+</script>
+
 <template>
   <div
     class="flex bg-white w-full px-4 py-3 rounded-sm flex-row gap-3 text-black"
@@ -7,13 +64,13 @@
         <img
           v-if="partyLogo"
           class="w-full h-full rounded-full shadow"
-          :src="`${$config.path.images}/${partyLogo}`"
+          :src="`${$config.public.path.images}/${partyLogo}`"
           :alt="partyName"
         />
         <img
           v-else
           class="w-full h-full rounded-full shadow"
-          :src="`${$config.path.images}/party/dummy.jpg`"
+          :src="`${$config.public.path.images}/party/dummy.jpg`"
           alt="Dummy Party Logo"
         />
       </div>
@@ -60,66 +117,3 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import Vue from 'vue';
-import { PromiseStatus } from '@/models/promise';
-
-export default Vue.extend({
-  name: 'PartyCard',
-  props: {
-    partyLogo: {
-      type: String,
-      default: '',
-      required: false,
-    },
-    partyName: {
-      type: String,
-      default: '',
-    },
-    partyPromises: {
-      type: Array,
-      default: () => [],
-    },
-    buttonUrl: {
-      type: String,
-      default: '',
-    },
-  },
-  computed: {
-    sumPartyPromises() {
-      const promiseStatus = this.partyPromises as Array<any>;
-      const count = promiseStatus.map((a: any) => a.count);
-      if (count.length > 0) {
-        const sum = count.reduce((a: any, b: any) => a + b);
-        return sum;
-      } else {
-        return 0;
-      }
-    },
-    promises() {
-      const promiseStatus = this.partyPromises as Array<any>;
-      // console.log(promiseStatus);
-      if (promiseStatus.length > 0) {
-        const chart = promiseStatus.map((a: any) => {
-          const status = a.status;
-          const count = a.count;
-          const countPercentage = (
-            (a.count / (this as any).sumPartyPromises) *
-            100
-          ).toFixed(2);
-          return { status, count, countPercentage };
-        });
-        return chart;
-      } else {
-        const dummy = [
-          { status: PromiseStatus.NoData, countPercentage: '100' },
-        ];
-        return dummy;
-      }
-    },
-  },
-});
-</script>
-
-<style></style>

@@ -1,7 +1,150 @@
+<script lang="ts" setup>
+import { reactive, PropType, watch } from 'vue';
+import DropdownSelect, {
+  Option,
+} from '@/components/dropdown-select/dropdown-select.vue';
+import ToggleList, { ListOption } from '@/components/toggle/toggle-list.vue';
+import { Filter, FilterType } from '@/models/filter';
+import parties from '@/data/parties.json';
+import {
+  PromiseStatus,
+  promiseStatusOrder,
+  promiseStatusTextMap,
+  PromiseTopic,
+  promiseTopicOrder,
+  promiseTopicTextMap,
+} from '~/models/promise';
+import Button from '@/components/button.vue';
+
+const $emit = defineEmits(['input']);
+
+const [governmentParties, oppositionParties] = parties.reduce<
+  [Option[], Option[]]
+>(
+  ([government, opposition], { side, name }) => {
+    const option: Option = {
+      value: name,
+      label: name,
+      iconUrl: `/party/${name.split('/')[0]}.jpg`,
+    };
+
+    return side === 'government'
+      ? [[...government, option], opposition]
+      : [government, [...opposition, option]];
+  },
+  [[], []]
+);
+
+const props = defineProps({
+  modelValue: {
+    type: Array as PropType<Filter[]>,
+    default: () => [],
+  },
+});
+
+const state = reactive({
+  partyOptions: [
+    {
+      isHeader: true,
+      label: 'พรรคร่วมรัฐบาล',
+    },
+    ...governmentParties.sort((a, z) => a.label.localeCompare(z.label)),
+    {
+      isHeader: true,
+      label: 'พรรคฝ่ายค้าน',
+    },
+    ...oppositionParties.sort((a, z) => a.label.localeCompare(z.label)),
+  ] as Option[],
+  topicOptions: promiseTopicOrder.map((topic) => ({
+    value: topic,
+    label: promiseTopicTextMap.get(topic)?.short,
+    iconUrl: `/topic/${topic}_small.png`,
+  })) as Option[],
+  statusOptions: [
+    {
+      value: '',
+      label: 'ทุกสถานะคำสัญญา',
+    },
+    ...promiseStatusOrder.map((status) => ({
+      value: status,
+      label: promiseStatusTextMap.get(status),
+      colorClass: `bg-status-${status}`,
+    })),
+  ] as ListOption[],
+  selectedParty: '',
+  selectedTopic: '' as PromiseTopic | '',
+  selectedStatus: '' as PromiseStatus | '',
+  keyword: '',
+  isDialogOpenInMobile: false,
+});
+
+const apply = () => {
+  const filters = [
+    {
+      type: FilterType.Party,
+      value: state.selectedParty,
+    },
+    {
+      type: FilterType.Topic,
+      value: state.selectedTopic,
+    },
+    {
+      type: FilterType.Status,
+      value: state.selectedStatus,
+    },
+    {
+      type: FilterType.Keyword,
+      value: state.keyword,
+    },
+  ].filter(({ value }) => value) as Filter[];
+
+  $emit('input', filters);
+  state.isDialogOpenInMobile = false;
+};
+
+const reset = () => {
+  state.selectedParty = '';
+  state.selectedTopic = '';
+  state.selectedStatus = '';
+  state.keyword = '';
+
+  $emit('input', []);
+  state.isDialogOpenInMobile = false;
+};
+
+const updateInputFromFilter = ({ type, value }: Filter) => {
+  switch (type) {
+    case FilterType.Party:
+      state.selectedParty = value;
+      break;
+    case FilterType.Status:
+      state.selectedStatus = value as PromiseStatus;
+      break;
+    case FilterType.Topic:
+      state.selectedTopic = value as PromiseTopic;
+      break;
+    case FilterType.Keyword:
+      state.keyword = value;
+  }
+};
+
+watch(
+  () => props.modelValue,
+  (newFilters: Filter[]) => {
+    state.selectedParty = '';
+    state.selectedTopic = '';
+    state.selectedStatus = '';
+    state.keyword = '';
+
+    newFilters.forEach(updateInputFromFilter);
+  }
+);
+</script>
+
 <template>
   <div
     class="flex flex-col bg-ultramarine lg:w-80 self-start fixed lg:sticky bottom-0 left-0 right-0 lg:h-auto lg:top-10 lg:mr-12 z-50 border-white border"
-    :class="{ 'h-screen': isDialogOpenInMobile }"
+    :class="{ 'h-screen': state.isDialogOpenInMobile }"
   >
     <div class="flex lg:hidden flex-row text-white p-3 space-x-2 items-center">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -12,10 +155,10 @@
       <p class="wv-u4 wv-font-semibold flex-1">คัดกรองคำสัญญา</p>
       <button
         class="flex justify-center items-center w-7 h-7 p-1.5 bg-white rounded-full text-ultramarine"
-        @click="isDialogOpenInMobile = !isDialogOpenInMobile"
+        @click="state.isDialogOpenInMobile = !state.isDialogOpenInMobile"
       >
         <svg
-          v-if="isDialogOpenInMobile"
+          v-if="state.isDialogOpenInMobile"
           viewBox="0 0 18 17"
           fill="currentColor"
         >
@@ -52,7 +195,7 @@
 
     <div
       :class="`flex flex-col overflow-y-auto ${
-        isDialogOpenInMobile ? 'flex-1' : 'h-0 lg:flex-1'
+        state.isDialogOpenInMobile ? 'flex-1' : 'h-0 lg:flex-1'
       }`"
     >
       <div
@@ -60,21 +203,27 @@
       >
         <p class="text-white wv-font-semibold">คัดกรองคำสัญญา</p>
         <DropdownSelect
-          v-model="selectedParty"
-          :options="partyOptions"
+          v-model="state.selectedParty"
+          :options="state.partyOptions"
           placeholder="ทุกพรรคที่ให้คำสัญญา"
           placeholder-selecting="เลือกพรรค"
+          @input="(e) => (state.selectedParty = e)"
         />
         <DropdownSelect
-          v-model="selectedTopic"
-          :options="topicOptions"
+          v-model="state.selectedTopic"
+          :options="state.topicOptions"
           placeholder="ทุกประเด็นคำสัญญา"
           placeholder-selecting="เลือกประเด็น"
-          :selected="selectedTopic"
+          :selected="state.selectedTopic"
+          @input="(e) => (state.selectedTopic = e)"
         />
 
         <p class="text-white wv-font-semibold">เลือกดูคำสัญญาตามสถานะ</p>
-        <ToggleList v-model="selectedStatus" :options="statusOptions" />
+        <ToggleList
+          v-model="state.selectedStatus"
+          :options="state.statusOptions"
+          @input="(e) => (state.selectedStatus = e)"
+        />
 
         <p class="text-white wv-font-semibold">ค้นหาตามคีย์เวิร์ด</p>
         <div class="flex flex-row p-1 rounded-sm bg-white space-x-1">
@@ -89,7 +238,7 @@
             </svg>
           </div>
           <input
-            v-model="keyword"
+            v-model="state.keyword"
             class="flex-1 px-1"
             type="text"
             placeholder="พิมพ์คำเพื่อค้นหาสัญญา"
@@ -149,146 +298,3 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import Vue, { PropType } from 'vue';
-import DropdownSelect, {
-  Option,
-} from '@/components/dropdown-select/dropdown-select.vue';
-import ToggleList, { ListOption } from '@/components/toggle/toggle-list.vue';
-import { Filter, FilterType } from '@/models/filter';
-import parties from '@/data/parties.json';
-import {
-  PromiseStatus,
-  promiseStatusOrder,
-  promiseStatusTextMap,
-  PromiseTopic,
-  promiseTopicOrder,
-  promiseTopicTextMap,
-} from '~/models/promise';
-import Button from '@/components/button.vue';
-
-const [governmentParties, oppositionParties] = parties.reduce<
-  [Option[], Option[]]
->(
-  ([government, opposition], { side, name }) => {
-    const option: Option = {
-      value: name,
-      label: name,
-      iconUrl: `/party/${name.split('/')[0]}.jpg`,
-    };
-
-    return side === 'government'
-      ? [[...government, option], opposition]
-      : [government, [...opposition, option]];
-  },
-  [[], []]
-);
-
-export default Vue.extend({
-  name: 'FilterPanel',
-  components: { DropdownSelect, ToggleList, Button },
-  props: {
-    value: {
-      type: Array as PropType<Filter[]>,
-      default: () => [],
-    },
-  },
-  data() {
-    return {
-      partyOptions: [
-        {
-          isHeader: true,
-          label: 'พรรคร่วมรัฐบาล',
-        },
-        ...governmentParties.sort((a, z) => a.label.localeCompare(z.label)),
-        {
-          isHeader: true,
-          label: 'พรรคฝ่ายค้าน',
-        },
-        ...oppositionParties.sort((a, z) => a.label.localeCompare(z.label)),
-      ] as Option[],
-      topicOptions: promiseTopicOrder.map((topic) => ({
-        value: topic,
-        label: promiseTopicTextMap.get(topic)?.short,
-        iconUrl: `/topic/${topic}_small.png`,
-      })) as Option[],
-      statusOptions: [
-        {
-          value: '',
-          label: 'ทุกสถานะคำสัญญา',
-        },
-        ...promiseStatusOrder.map((status) => ({
-          value: status,
-          label: promiseStatusTextMap.get(status),
-          colorClass: `bg-status-${status}`,
-        })),
-      ] as ListOption[],
-      selectedParty: '',
-      selectedTopic: '' as PromiseTopic | '',
-      selectedStatus: '' as PromiseStatus | '',
-      keyword: '',
-      isDialogOpenInMobile: false,
-    };
-  },
-  watch: {
-    value(newFilters: Filter[]) {
-      this.selectedParty = '';
-      this.selectedTopic = '';
-      this.selectedStatus = '';
-      this.keyword = '';
-
-      newFilters.forEach(this.updateInputFromFilter);
-    },
-  },
-  methods: {
-    apply() {
-      const filters = [
-        {
-          type: FilterType.Party,
-          value: this.selectedParty,
-        },
-        {
-          type: FilterType.Topic,
-          value: this.selectedTopic,
-        },
-        {
-          type: FilterType.Status,
-          value: this.selectedStatus,
-        },
-        {
-          type: FilterType.Keyword,
-          value: this.keyword,
-        },
-      ].filter(({ value }) => value) as Filter[];
-
-      this.$emit('input', filters);
-      this.isDialogOpenInMobile = false;
-    },
-    reset() {
-      this.selectedParty = '';
-      this.selectedTopic = '';
-      this.selectedStatus = '';
-      this.keyword = '';
-
-      this.$emit('input', []);
-      this.isDialogOpenInMobile = false;
-    },
-    updateInputFromFilter({ type, value }: Filter) {
-      switch (type) {
-        case FilterType.Party:
-          this.selectedParty = value;
-          break;
-        case FilterType.Status:
-          this.selectedStatus = value as PromiseStatus;
-          break;
-        case FilterType.Topic:
-          this.selectedTopic = value as PromiseTopic;
-          break;
-        case FilterType.Keyword:
-          this.keyword = value;
-      }
-    },
-  },
-});
-</script>

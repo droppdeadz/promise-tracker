@@ -1,17 +1,5 @@
-<template>
-  <div class="flex gap-1" :class="alignmentClass">
-    <ToggleItem
-      v-for="option in options"
-      :key="option.value"
-      :selected="option.value === value"
-      :option="option"
-      @selected="$emit('input', option.value)"
-    />
-  </div>
-</template>
-
-<script lang="ts">
-import Vue, { PropType } from 'vue';
+<script lang="ts" setup>
+import { computed, PropType } from 'vue';
 import ToggleItem from './toggle-item.vue';
 
 enum Alignment {
@@ -25,27 +13,36 @@ export interface ListOption {
   colorClass?: string;
 }
 
-export default Vue.extend({
-  name: 'ToggleList',
-  components: { ToggleItem },
-  props: {
-    value: {
-      type: String,
-      default: '',
-    },
-    options: {
-      type: Array as PropType<ListOption[]>,
-      default: () => [],
-    },
-    align: {
-      type: String,
-      default: Alignment.Vertical,
-    },
+const $emit = defineEmits(['input']);
+
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: '',
   },
-  computed: {
-    alignmentClass() {
-      return this.align === Alignment.Vertical ? 'flex-col' : 'flex-row';
-    },
+  options: {
+    type: Array as PropType<ListOption[]>,
+    default: () => [],
+  },
+  align: {
+    type: String,
+    default: Alignment.Vertical, // eslint-disable-line vue/valid-define-props
   },
 });
+
+const alignmentClass = computed(() => {
+  return props.align === Alignment.Vertical ? 'flex-col' : 'flex-row';
+});
 </script>
+
+<template>
+  <div class="flex gap-1" :class="alignmentClass">
+    <ToggleItem
+      v-for="option in options"
+      :key="option.value"
+      :selected="option.value === modelValue"
+      :option="option"
+      @selected="$emit('input', option.value)"
+    />
+  </div>
+</template>
